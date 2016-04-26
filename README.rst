@@ -3,11 +3,18 @@ django-jenkins
 
 Plug and play continuous integration with Django and Jenkins
 
+.. image:: https://img.shields.io/pypi/v/django-jenkins.svg
+    :target: https://pypi.python.org/pypi/django-jenkins
+    
 .. image:: https://requires.io/github/kmmbvnr/django-jenkins/requirements.png?branch=master
    :target: https://requires.io/github/kmmbvnr/django-jenkins/requirements/?branch=master
 
-.. image:: https://pypip.in/d/django-jenkins/badge.png
-        :target: https://crate.io/packages/django-jenkins
+.. image:: https://img.shields.io/pypi/dm/django-jenkins.svg
+        :target: https://pypi.python.org/pypi/django-jenkins
+
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+        :target: https://gitter.im/kmmbvnr/django-jenkins?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 
 Installation
 ------------
@@ -23,11 +30,11 @@ Or by downloading the source and running::
 Latest git version::
 
     $ pip install -e git+git://github.com/kmmbvnr/django-jenkins.git#egg=django-jenkins
+    $ pip install coverage
 
 Installation for Python 3::
 
     Works out of the box
-    Note that lettuce itself is not yet ported to python 3
 
 
 Usage
@@ -36,13 +43,12 @@ Usage
 Add ``'django_jenkins'`` to your ``INSTALLED_APPS`` list.
 Configure Jenkins to run the following command::
 
-    $ ./manage.py jenkins
+    $ ./manage.py jenkins --enable-coverage
 
 This will create reports/ directory with junit xml, Coverage and Pylint
 reports.
 
 For more details see the generic tutorial: https://sites.google.com/site/kmmbvnr/home/django-jenkins-tutorial
-or tutorial for running django-jenkins on ShiningPanda CI https://docs.shiningpanda.com/tutorials/multi-databases/project.html
 
 Settings
 --------
@@ -51,30 +57,26 @@ Settings
 
   If present, it is supposed to be a list/tuple of django apps for Jenkins to run.
   Tests, reports, and coverage are generated only for the apps from this list.
-  You should specify --all option to ignore this setting.
 
 - ``JENKINS_TASKS``
 
-  List of Jenkins tasks executed by ``./manage.py jenkins`` command.
+  List of Jenkins reporters executed by ``./manage.py jenkins`` command.
 
   Default value::
 
-    JENKINS_TASKS = (
-        'django_jenkins.tasks.run_pylint',
-        'django_jenkins.tasks.with_coverage',
-    )
+    JENKINS_TASKS = ()
 
 - ``JENKINS_TEST_RUNNER``
 
-  The name of the class to use for starting the test suite for ``jenkins``
-  and ``jtest`` commands. Class should be inherited from
+  The name of the class to use for starting the test suite for ``jenkins`` command.
+  Class should be inherited from
   ``django_jenkins.runner.CITestSuiteRunner``
 
 
-Tasks
------
+Reporters
+---------
 
-Here is the list of tasks prebuild with django-jenkins
+Here is the reporters prebuild with django-jenkins
 
 - ``django_jenkins.tasks.run_pylint``
 
@@ -84,28 +86,12 @@ Here is the list of tasks prebuild with django-jenkins
 
 .. _Pylint: http://www.logilab.org/project/pylint
 
-- ``django_jenkins.tasks.with_coverage``
-
-  Produces `XML coverage report <http://nedbatchelder.com/code/coverage/sample_html/>`__ for Jenkins
-
-  Task-specific settings: ``COVERAGE_RCFILE``, ``COVERAGE_REPORT_HTML_OUTPUT_DIR``, ``COVERAGE_MEASURE_BRANCH``, ``COVERAGE_EXCLUDES``, ``COVERAGE_WITH_MIGRATIONS``, ``COVERAGE_EXCLUDES_FOLDERS``
-
-- ``django_jenkins.tasks.run_jshint``
-
-  Runs jshint tools over ``<app>/static/*/*.js`` files.
-  Creates Pylint compatible report for Jenkins
-
-  You should have the jshint installed
-
 - ``django_jenkins.tasks.run_csslint``
 
   Runs CSS lint tools over `app/static/*/*.css` files.
   Creates CSS Lint compatible report for Jenkins
 
-  You should have the csslint installed
-
-  Task-specific settings: ``CSSLINT_CHECKED_FILES``
-
+  You should have the csslint package installed
 
 - ``django_jenkins.tasks.run_pep8``
 
@@ -130,7 +116,7 @@ Here is the list of tasks prebuild with django-jenkins
 - ``django_jenkins.tasks.run_flake8``
 
   Runs flake8 tool over selected Django apps.
-  Creates Pylint compatible report for Jenkins.
+  Creates pep8 compatible report for Jenkins.
 
   You should have flake8_ python package installed to run this task.
 
@@ -145,126 +131,26 @@ Here is the list of tasks prebuild with django-jenkins
 
 .. _SLOCCount: http://www.dwheeler.com/sloccount/
 
-- ``django_jenkins.tasks.run_graphmodels``
-
-  Graphs an overview of the models of the selected Django apps.
-  Creates ``models.png`` graphic (`example <https://code.djangoproject.com/wiki/DjangoGraphviz#Examples>`__).
-
-  You should have django-extensions_ and pygraphviz_ installed to run this task.
-
-  Task-specific settings:
-
-  - ``GRAPH_MODELS``: A dictionary of settings for graph_models, most corresponding to the command-line options (with 'graphmodels\_' removed): ``fail_without_error``, ``disable_fields``, ``group_models``, ``all_applications``, ``outputfile``, ``layout``, ``verbose_names``, ``language``, ``exclude_columns``, ``exclude_models``, ``inheritance``
-
-.. _django-extensions: http://pypi.python.org/pypi/django-extensions
-.. _pygraphviz: http://pypi.python.org/pypi/pygraphviz/
-
-- ``django_jenkins.tasks.lettuce_tests``
-
-  Discover Lettuce tests from app/feature directories.
-
-  You should have the Lettuce_ Python package installed to run this task.
-
-.. _Lettuce: http://lettuce.it/
-
-- ``django_jenkins.tasks.with_local_celery``
-
-  Replacement for ``djcelery.tests.runners.CeleryTestSuiteRunner``
-  Change settings for run Celery_ tasks locally.
-
-.. _Celery: http://ask.github.com/django-celery/
-
-- ``django_jenkins.tasks.behave_tests``
-
-  Discover Behave tests from app/features directories.
-
-  You should have the Behave_ Python package installed to run this task.
-
-.. _Behave: http://pythonhosted.org/behave/
 
 Changelog
 ---------
 
 GIT Version
 ~~~~~~~~~~~
-* django_tests and dir_tests test dicovery tasks are replaced by directory discover test runner build-in in django 1.6
 
-0.14.1 2013-08-15
-~~~~~~~~~~~~~~~~~
-* Django 1.6 compatibility
-* Flake8 support
-* Pep8 file configuration support
-* CSSLint no longer shipped with django-jenkins. Install it with ``npm install csslint -g``
+* Flake8 >= 2.5.0 support
+* Drop django 1.7 support
 
 
-0.14.0 2012-12-15
-~~~~~~~~~~~~~~~~~
-* Python 3 (with django 1.5) support
-* JSHint no longer shipped with django-jenkins. Install it with ``npm install jshint -g``
-
-
-0.13.0 2012-07-15
-~~~~~~~~~~~~~~~~~
-* unittest2 compatibility
-* **WARNING:** Junit test data now stored in one junit.xml file
-* Support for pep8 1.3
-* New in-directory test discovery task
-* Added --liveserver option
-* Fixes in jslint and csslint tasks
-
-0.12.1 2012-03-15
-~~~~~~~~~~~~~~~~~
-* Added Celery task
-* Add nodejs support for jslint and csslint tasks
-* Improve js and css files selection
-* Bug fixes
-
-0.12.0 2012-01-15
+0.18.0 1985-10-26
 ~~~~~~~~~~~~~~~~~
 
-* Django 1.3 in requirements
-* Windmill support was removed (Django 1.4 has a better implementation)
-* Ignore South migrations by default
-* Added SLOCCount task
-* Added Lettuce testing task
-* Added CSS Lint task
-* Used xml output format for jslint
-* Used native pep8 output format
-
-0.11.1 2010-06-15
-~~~~~~~~~~~~~~~~~
-
-* Do not produce file reports for jtest command by default
-* Ignore Django apps without models.py file, as in Django test command
-* Fix jslint_runner.js packaging
-* Fix coverage file filtering
-
-0.11.0 2010-04-15
-~~~~~~~~~~~~~~~~~
-
-* Support pep8, Pyflakes, jslint tools
-* Added jtest command
-* Allow specify custom test runner
-* Various fixes, thnk githubbers :)
-
-0.10.0 2010-02-15
-~~~~~~~~~~~~~~~~~
-
-* Pluggable ci tasks refactoring
-* Alpha support for windmill tests
-* Partial python 2.4 compatibility
-* Renamed to django-jenkins
-
-0.9.1 2010-12-15
-~~~~~~~~~~~~~~~~
-
-* Python 2.5 compatibility
-* Make compatible with latest Pylint only
-
-0.9.0 2010-10-15
-~~~~~~~~~~~~~~~~
-
-* Initial public release
+* An exceptional release for the last 5 years issued not on 15th day of a month
+* Drop python 2.6 support
+* Drop django 1.6 support
+* Add django 1.9 compatibility
+* Drop scss-lint support (the tool no longer has xml output)
+* Coverage>=4 compatibility
 
 
 Contribution guide
@@ -276,39 +162,18 @@ Contribution guide
     npm install jshint
     npm install csslint
     PATH=$PATH:$WORKSPACE/node_modules/.bin
-    tox -e $TOXENV
+    tox
 
-* Ensure that everythig works
-* Modify the code
-* Ensure that everythig works again
+* Ensure that everything works
+* Modify the *the only one thing*
+* Ensure that everything works again
 * Fix pep8/pyflakes errors and minimize pylint's warninigs
 * Pull request!
 
 Authors
 -------
-Mikhail Podgurskiy <kmmbvnr@gmail.com>
+Created and maintained by Mikhail Podgurskiy <kmmbvnr@gmail.com>
 
-Contributors:
+Contributors: https://github.com/kmmbvnr/django-jenkins/graphs/contributors
 
-* Chris Heisel (https://github.com/cmheisel)
-* Andrey Fedoseev (https://github.com/andreyfedoseev)
-* Jannis Leidel (https://github.com/jezdez)
-* Luciano Pacheco (https://github.com/lucmult)
-* Julien Lirochon (https://github.com/jlirochon)
-* Olivier Girardot (https://github.com/ssaboum)
-* Victor Safronovich (https://github.com/suvit)
-* Bradley Ayers (https://github.com/bradleyayers)
-* Jonas Obrist (https://github.com/ojii)
-* John Paulett (https://github.com/johnpaulett)
-* Michael Ellingen (https://github.com/mvantellingen)
-* Domen Kožar (https://github.com/iElectric)
-* Simon Panay (https://github.com/simonpanay)
-* Tom Mortimer-Jones (https://github.com/morty)
-* Philip Kimmey (https://github.com/philipkimmey)
-* Peter Baumgartner (https://github.com/ipmb)
-* Kris Kumler (https://github.com/kkumler)
-* Axel Haustant (https://github.com/noirbizarre)
-
-Special thanks, for all github forks authors not listed here
-for project extensions ideas and problem identifications.
-
+Special thanks, for all github forks authors for project extensions ideas and problem identifications.
